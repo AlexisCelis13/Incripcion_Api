@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using Application;
+using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +83,8 @@ builder.Services.AddAcademicEnrollmentInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+// Bloque de seed eliminado
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -89,6 +93,21 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
+
+// Middleware de restricción por IP (solo escuela y localhost)
+app.Use(async (context, next) =>
+{
+    var allowedIps = new[] { "187.155.101.200", "127.0.0.1", "::1" };
+    var remoteIp = context.Connection.RemoteIpAddress?.ToString();
+
+    if (!allowedIps.Contains(remoteIp))
+    {
+        context.Response.StatusCode = 403; // Forbidden
+        await context.Response.WriteAsync("Acceso solo permitido desde la red de la escuela o localhost.");
+        return;
+    }
+    await next();
+});
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -48,7 +48,7 @@ namespace Application.Services
             {
                 throw;
             }
-            await _enrollmentRepository.UpdateAsync(enrollment);
+            await _enrollmentRepository.AddCourseAsync(semesterId, course);
             return enrollment;
         }
     }

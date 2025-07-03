@@ -39,5 +39,18 @@ namespace Infrastructure.Repositories
             _context.SemesterEnrollments.Update(enrollment);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddCourseAsync(Guid semesterId, EnrolledCourse course)
+        {
+            var semester = await _context.SemesterEnrollments
+                .Include(e => e.EnrolledCourses)
+                .FirstOrDefaultAsync(e => e.Id == semesterId);
+
+            if (semester == null)
+                throw new Exception("Semester not found");
+
+            semester.EnrolledCourses.Add(course);
+            await _context.SaveChangesAsync();
+        }
     }
 } 
