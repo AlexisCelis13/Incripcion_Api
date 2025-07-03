@@ -92,10 +92,10 @@ app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
 
-// Middleware de restricción por IP (soporta X-Forwarded-For para Render)
+// Middleware de restricción por IP (solo permite la IP de la escuela)
 app.Use(async (context, next) =>
 {
-    var allowedIps = new[] { "187.155.101.200", "127.0.0.1", "::1" };
+    var allowedIp = "187.155.101.200";
 
     // Intenta obtener la IP real desde el header X-Forwarded-For
     var remoteIp = context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
@@ -105,10 +105,10 @@ app.Use(async (context, next) =>
     if (remoteIp != null && remoteIp.Contains(","))
         remoteIp = remoteIp.Split(',')[0].Trim();
 
-    if (!allowedIps.Contains(remoteIp))
+    if (remoteIp != allowedIp)
     {
         context.Response.StatusCode = 403; // Forbidden
-        await context.Response.WriteAsync("Acceso solo permitido desde la red de la escuela o localhost.");
+        await context.Response.WriteAsync("Acceso solo permitido desde la red de la escuela.");
         return;
     }
     await next();
