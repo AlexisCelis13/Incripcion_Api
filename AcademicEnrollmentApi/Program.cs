@@ -87,9 +87,6 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // Habilitar Swagger siempre (descomentar para producción)
-app.UseSwagger();
-app.UseSwaggerUI();
-
 app.UseSerilogRequestLogging();
 
 // Middleware de restricción por IP (solo permite la IP de la escuela)
@@ -113,6 +110,10 @@ app.Use(async (context, next) =>
     }
     await next();
 });
+
+// Swagger SIEMPRE después del middleware de restricción
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
